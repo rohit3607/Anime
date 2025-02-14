@@ -17,9 +17,9 @@ async def start_msg(client, message):
     txtargs = message.text.split()
     temp = await sendMessage(message, "<i>Connecting..</i>")
 
-    if not await is_fsubbed(uid):
-        txt, btns = await get_fsubs(uid, txtargs)
-        return await editMessage(temp, txt, InlineKeyboardMarkup(btns))
+    #if not await is_fsubbed(uid):
+        #txt, btns = await get_fsubs(uid, txtargs)
+        #return await editMessage(temp, txt, #InlineKeyboardMarkup(btns))
 
     if len(txtargs) <= 1:
         await temp.delete()
