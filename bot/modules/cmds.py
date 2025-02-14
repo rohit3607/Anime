@@ -16,9 +16,11 @@ async def start_msg(client, message):
     from_user = message.from_user
     txtargs = message.text.split()
     temp = await sendMessage(message, "<i>Connecting..</i>")
+
     if not await is_fsubbed(uid):
         txt, btns = await get_fsubs(uid, txtargs)
         return await editMessage(temp, txt, InlineKeyboardMarkup(btns))
+
     if len(txtargs) <= 1:
         await temp.delete()
         btns = []
@@ -31,10 +33,12 @@ async def start_msg(client, message):
                 btns[-1].insert(1, InlineKeyboardButton(bt, url=link))
             else:
                 btns.append([InlineKeyboardButton(bt, url=link)])
+
         smsg = Var.START_MSG.format(first_name=from_user.first_name,
-                                    last_name=from_user.first_name,
+                                    last_name=from_user.last_name,
                                     mention=from_user.mention, 
                                     user_id=from_user.id)
+
         if Var.START_PHOTO:
             await message.reply_photo(
                 photo=Var.START_PHOTO, 
@@ -44,12 +48,14 @@ async def start_msg(client, message):
         else:
             await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
         return
+
     try:
         arg = (await decode(txtargs[1])).split('-')
     except Exception as e:
         await rep.report(f"User : {uid} | Error : {str(e)}", "error")
         await editMessage(temp, "<b>Input Link Code Decode Failed !</b>")
         return
+
     if len(arg) == 2 and arg[0] == 'get':
         try:
             fid = int(int(arg[1]) / abs(int(Var.FILE_STORE)))
@@ -57,18 +63,53 @@ async def start_msg(client, message):
             await rep.report(f"User : {uid} | Error : {str(e)}", "error")
             await editMessage(temp, "<b>Input Link Code is Invalid !</b>")
             return
+
         try:
             msg = await client.get_messages(Var.FILE_STORE, message_ids=fid)
             if msg.empty:
                 return await editMessage(temp, "<b>File Not Found !</b>")
-            nmsg = await msg.copy(message.chat.id, reply_markup=None)
-            await temp.delete()
-            if Var.AUTO_DEL:
-                async def auto_del(msg, timer):
-                    await asleep(timer)
-                    await msg.delete()
-                await sendMessage(message, f'<i>File will be Auto Deleted in {convertTime(Var.DEL_TIMER)}, Forward to Saved Messages Now..</i>')
-                bot_loop.create_task(auto_del(nmsg, Var.DEL_TIMER))
+
+            AUTO_DEL, DEL_TIMER, HIDE_CAPTION, CHNL_BTN, PROTECT_MODE = await asyncio.gather(
+                db.get_auto_delete(), db.get_del_timer(), db.get_hide_caption(), db.get_channel_button(), db.get_protect_content()
+            )
+
+            if CHNL_BTN:
+                button_name, button_link = await db.get_channel_button_link()
+
+            original_caption = msg.caption.html if msg.caption else ""
+            if CUSTOM_CAPTION and msg.document:
+                caption = CUSTOM_CAPTION.format(previouscaption=original_caption, filename=msg.document.file_name)
+            elif HIDE_CAPTION and (msg.document or msg.audio):
+                caption = f"{original_caption}\n\n{CUSTOM_CAPTION}"
+            else:
+                caption = original_caption
+
+            reply_markup = (
+                InlineKeyboardMarkup([[InlineKeyboardButton(text=button_name, url=button_link)]])
+                if CHNL_BTN and (msg.document or msg.photo or msg.video or msg.audio)
+                else msg.reply_markup
+            )
+
+            try:
+                copied_msg = await msg.copy(
+                    message.chat.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_MODE
+                )
+                await temp.delete()
+
+                if AUTO_DEL:
+                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
+                    asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
+
+            except FloodWait as e:
+                await asyncio.sleep(e.x)
+                copied_msg = await msg.copy(
+                    message.chat.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_MODE
+                )
+
+                if AUTO_DEL:
+                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
+                    asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
+
         except Exception as e:
             await rep.report(f"User : {uid} | Error : {str(e)}", "error")
             await editMessage(temp, "<b>File Not Found !</b>")
