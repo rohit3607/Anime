@@ -4,8 +4,8 @@ aiofiles
 anitopy
 apscheduler
 dnspython
-motor
-pymongo
+motor>=3.4
+pymongo>=4.0
 feedparser
 psutil
 pycountry
