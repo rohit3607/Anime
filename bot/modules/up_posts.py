@@ -32,5 +32,5 @@ async def update_shdr(name, link):
         TD_lines = TD_SCHR.text.split('\n')
         for i, line in enumerate(TD_lines):
             if line.startswith(f"📌 {name}"):
-                TD_lines[i+2] = f"    • **Status :** ✅ __Uploaded__\n    • **Link :** {link}"
+                TD_lines[i+2] = f"    • Status : ✅ __Uploaded__\n    • Link : {link}"
         await TD_SCHR.edit("\n".join(TD_lines))
