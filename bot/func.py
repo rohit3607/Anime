@@ -134,3 +134,5 @@ async def is_userJoin(client, user_id, channel_id):
         print(f"!Error on is_userJoin(): {e}")
         return False
 #=============================================================================================================================================================================
+
+subscribed = filters.create(is_subscribed)
