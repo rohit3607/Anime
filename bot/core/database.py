@@ -13,20 +13,20 @@ class MongoDB:
         self.__client = AsyncIOMotorClient(uri)
         self.__db = self.__client[database_name]
         self.__animes = self.__db.animes[Var.BOT_TOKEN.split(':')[0]]
-        self.channel_data = self.database['channels']
-        self.user_data = self.database['users']
+        self.channel_data = self.__db['channels']
+        self.user_data = self.__db['users']
 
-        self.auto_delete_data = self.database['auto_delete']
-        self.hide_caption_data = self.database['hide_caption']
-        self.protect_content_data = self.database['protect_content']
-        self.channel_button_data = self.database['channel_button']
+        self.auto_delete_data = self.__db['auto_delete']
+        self.hide_caption_data = self.__db['hide_caption']
+        self.protect_content_data = self.__db['protect_content']
+        self.channel_button_data = self.__db['channel_button']
 
-        self.del_timer_data = self.database['del_timer']
-        self.channel_button_link_data = self.database['channelButton_link']
+        self.del_timer_data = self.__db['del_timer']
+        self.channel_button_link_data = self.__db['channelButton_link']
 
-        self.rqst_fsub_data = self.database['request_forcesub']
-        self.rqst_fsub_Channel_data = self.database['request_forcesub_channel']
-        self.store_reqLink_data = self.database['store_reqLink']
+        self.rqst_fsub_data = self.__db['request_forcesub']
+        self.rqst_fsub_Channel_data = self.__db['request_forcesub_channel']
+        self.store_reqLink_data = self.__db['store_reqLink']
 
 
 
