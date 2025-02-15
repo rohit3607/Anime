@@ -8,7 +8,7 @@ from bot.autoDelete import convert_time
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from database.database import db 
-from plugins.query import *
+from bot.query import *
 
 @Bot.on_message(filters.command('add_fsub') & filters.private & filters.user(OWNER_ID))
 async def add_forcesub(client: Client, message: Message):
