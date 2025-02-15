@@ -5,7 +5,7 @@ import pymongo, os
 import motor
 
 dbclient = pymongo.MongoClient(Var.MONGO_URI)
-database = dbclient[Rohit]
+database = dbclient["Rohit"]
 
 
 class MongoDB:
