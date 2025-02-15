@@ -1,13 +1,11 @@
 #made by @rohit_1888
 
-from bot import Bot
+from bot import bot
 import asyncio
 from pyrogram.enums import ParseMode, ChatAction
-from helper_func import is_admin, banUser
 from plugins.FORMATS import *
 from plugins.autoDelete import convert_time
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from config import OWNER_ID
 from pyrogram import Client, filters
 from database.database import db 
 from plugins.query import *
