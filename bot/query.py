@@ -2,10 +2,10 @@ import random
 from bot import bot
 from pyrogram import __version__
 from bot.FORMATS import *
-from config import *
+
 from pyrogram.enums import ChatAction
 from bot.autoDelete import convert_time
-from database.database import db
+from bot.core.database import db
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, ReplyKeyboardMarkup, ReplyKeyboardRemove    
 
 #File setting function for retriveing modes and state of file related setting
