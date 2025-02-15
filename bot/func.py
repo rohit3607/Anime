@@ -26,7 +26,9 @@ import time
 from datetime import datetime
 import random
 import string
-
+from bot.core.database import db
+from bot.core.auto_animes import get_animes
+from bot.core.reporter import rep
 #=============================================================================================================================================================================
 # -------------------- HELPER FUNCTIONS FOR USER VERIFICATION IN DIFFERENT CASES -------------------- 
 #=============================================================================================================================================================================
