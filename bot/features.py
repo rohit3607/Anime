@@ -3,8 +3,8 @@
 from bot import bot
 import asyncio
 from pyrogram.enums import ParseMode, ChatAction
-from plugins.FORMATS import *
-from plugins.autoDelete import convert_time
+from bot.FORMATS import *
+from bot.autoDelete import convert_time
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from database.database import db 
@@ -106,7 +106,7 @@ async def delete_all_forcesub(client: Client, message: Message):
         await pro.edit("<b><blockquote>⁉️ No channel IDs available to delete</blockquote></b>", reply_markup=reply_markup)
 
 
-@Bot.on_message(filters.command('fsub_chnl') & filters.private & is_admin)
+@Bot.on_message(filters.command('fsub_chnl') & filters.private)
 async def get_forcesub(client: Client, message: Message):
     pro = await message.reply("<b><i>Processing....</i></b>", quote=True)
     channels = await db.get_all_channels()
@@ -137,7 +137,7 @@ async def get_forcesub(client: Client, message: Message):
 #=====================================================================================##
 
 # Auto Delete Setting Commands
-@Bot.on_message(filters.command('auto_del') & filters.private & ~banUser)
+@Bot.on_message(filters.command('auto_del') & filters.private)
 async def autoDelete_settings(client, message):
     await message.reply_chat_action(ChatAction.TYPING)
 
@@ -165,7 +165,7 @@ async def autoDelete_settings(client, message):
 
 
 #Files related settings command
-@Bot.on_message(filters.command('files') & filters.private & ~banUser)
+@Bot.on_message(filters.command('files') & filters.private)
 async def files_commands(client: Client, message: Message):
     await message.reply_chat_action(ChatAction.TYPING)
 
@@ -204,7 +204,7 @@ async def files_commands(client: Client, message: Message):
         await message.reply(f"<b>! Eʀʀᴏʀ Oᴄᴄᴜʀᴇᴅ..\n<blockquote>Rᴇᴀsᴏɴ:</b> {e}</blockquote><b><i>Cᴏɴᴛᴀɴᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ: @rohit_1888</i></b>", reply_markup=reply_markup)
 
 #Request force sub mode commad,,,,,,
-@Bot.on_message(filters.command('req_fsub') & filters.private & ~banUser)
+@Bot.on_message(filters.command('req_fsub') & filters.private)
 async def handle_reqFsub(client: Client, message: Message):
     await message.reply_chat_action(ChatAction.TYPING)
     try:
