@@ -122,7 +122,7 @@ async def start_msg(client, message):
 # Create a global dictionary to store chat data
 chat_data_cache = {}
 
-@bot.on_message(filters.command('start') & filters.private & ~banUser)
+@bot.on_message(filters.command('start') & filters.private)
 async def not_joined(client: Client, message: Message):
     temp = await message.reply(f"<b>??</b>")
 
