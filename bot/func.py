@@ -1,4 +1,4 @@
-import asyncio
+
 import json
 
 import os
@@ -10,6 +10,26 @@ from pathlib import Path
 
 import aiofiles
 import aiohttp
+
+import binascii
+import base64
+import re
+import asyncio
+from pyrogram import filters, Client
+from pyrogram.enums import ChatMemberStatus
+from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.errors import FloodWait
+from shortzy import Shortzy
+import requests
+import time
+from datetime import datetime
+import random
+import string
+
+#=============================================================================================================================================================================
+# -------------------- HELPER FUNCTIONS FOR USER VERIFICATION IN DIFFERENT CASES -------------------- 
+#=============================================================================================================================================================================
 
 OK = {}
 
