@@ -23,7 +23,7 @@ from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram import filters, Client
 from bot import bot, bot_loop, Var, ani_cache
 from bot.core.database import db
-from bot.core.func_utils import *
+from bot.core.func import *
 from bot.core.auto_animes import get_animes
 from bot.core.reporter import rep
 
