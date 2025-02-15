@@ -4,8 +4,8 @@ import time
 import pymongo, os
 import motor
 
-dbclient = pymongo.MongoClient(Var.MONGO_URI)
-database = dbclient["Rohit"]
+#dbclient = pymongo.MongoClient(Var.MONGO_URI)
+#database = dbclient["Rohit"]
 
 
 class MongoDB:
