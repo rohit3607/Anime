@@ -1,6 +1,11 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from bot import Var
 
+
+dbclient = pymongo.MongoClient(Var.MONGO_URI)
+database = dbclient[Rohit]
+
+
 class MongoDB:
     def __init__(self, uri, database_name):
         self.__client = AsyncIOMotorClient(uri)
