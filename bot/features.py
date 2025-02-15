@@ -7,7 +7,7 @@ from bot.FORMATS import *
 from bot.autoDelete import convert_time
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
-from database.database import db 
+from bot.core.database import db 
 from bot.query import *
 
 @bot.on_message(filters.command('add_fsub') & filters.private & filters.user(Var.ADMINS))
