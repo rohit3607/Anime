@@ -157,7 +157,7 @@ async def not_joined(client: Client, message: Message):
         for total, chat_id in enumerate(await db.get_all_channels(), start=1):
             await message.reply_chat_action(ChatAction.PLAYING)
 
-            # Show the join button of non-subscribed Channels.....
+            # Show the join button of non-subscribed Channels
             if not await is_userJoin(client, user_id, chat_id):
                 try:
                     # Check if chat data is in cache
@@ -190,7 +190,10 @@ async def not_joined(client: Client, message: Message):
                     return await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
 
         try:
-            buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{client.username}?start={message.command[1]}")])
+            # Fetch bot username correctly
+            bot_info = await client.get_me()  
+            bot_username = bot_info.username  
+            buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
         except IndexError:
             pass
 
@@ -208,7 +211,6 @@ async def not_joined(client: Client, message: Message):
 
     except Exception as e:
         print(f"Error: {e}")  # Print the error message for debugging
-        # Optionally, send an error message to the user or handle further actions here
         await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
 
 
