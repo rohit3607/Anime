@@ -305,7 +305,7 @@ async def add_forcesub(client: Client, message: Message):
         await pro.edit(f'<b>❌ Error occurred while adding force-sub channels</b>\n\n{channel_list.strip()}\n\n<b><i>Please try again...</i></b>', reply_markup=reply_markup, disable_web_page_preview=True)
 
 
-@bot.on_message(filters.command('del_fsub') & filters.private & filters.user(OWNER_ID))
+@bot.on_message(filters.command('del_fsub') & filters.private & filters.user(Var.ADMINS))
 async def delete_all_forcesub(client: Client, message: Message):
     pro = await message.reply("<b><i>Processing....</i></b>", quote=True)
     channels = await db.get_all_channels()
