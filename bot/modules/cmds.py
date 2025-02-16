@@ -46,18 +46,15 @@ async def start_msg(client, message):
     if not await db.present_user(uid):
         await db.add_user(uid)
 
-    # 🔍 Initialize variables
-    REQFSUB = await db.get_request_forcesub()
+    # 🔍 Check if user is subscribed (including pending requests)
+    is_subscribed = await is_subscribed(None, client, message)
     buttons = []
-    count = 0
 
-    # ✅ Check Subscription for All Channels
-    for chat_id in await db.get_all_channels():
-        await message.reply_chat_action(ChatAction.PLAYING)  # Helps prevent bot delay
+    if not is_subscribed:
+        try:
+            REQFSUB = await db.get_request_forcesub()
 
-        if not await is_userJoin(client, uid, chat_id):
-            try:
-                # Fetch chat data (use cache to reduce API calls)
+            for chat_id in await db.get_all_channels():
                 if chat_id in chat_data_cache:
                     data = chat_data_cache[chat_id]
                 else:
@@ -66,8 +63,8 @@ async def start_msg(client, message):
 
                 cname = data.title
 
-                # Handle private channels & links
-                if REQFSUB and not data.username: 
+                # Handle private channels & generate invite links
+                if REQFSUB and not data.username:
                     link = await db.get_stored_reqLink(chat_id)
                     await db.add_reqChannel(chat_id)
 
@@ -77,71 +74,61 @@ async def start_msg(client, message):
                 else:
                     link = data.invite_link
 
-                # Add button for non-subscribed channels
                 buttons.append([InlineKeyboardButton(text=cname, url=link)])
-                count += 1
-                await temp.edit(f"<b>{'! ' * count}</b>")
 
-            except Exception as e:
-                print(f"Error: Bot might not be admin in {chat_id}")
-                continue  # Do NOT return; continue checking other channels
+            bot_info = await client.get_me()
+            bot_username = bot_info.username
+            buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
 
-    # 🚨 Always show the buttons if any exist
-    try:
-        bot_info = await client.get_me()  
-        bot_username = bot_info.username  
-        buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={txtargs[1] if len(txtargs) > 1 else ''}")])
-    except IndexError:
-        pass
+            await message.reply_photo(
+                photo=FORCE_PIC,
+                caption=FORCE_MSG.format(
+                    first=from_user.first_name,
+                    last=from_user.last_name,
+                    username=None if not from_user.username else '@' + from_user.username,
+                    mention=from_user.mention,
+                    id=from_user.id
+                ),
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
+            return
 
-    # ✅ Ensure we have at least one button before sending
-    if buttons:
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=from_user.first_name,
-                last=from_user.last_name,
-                username=None if not from_user.username else '@' + from_user.username,
-                mention=from_user.mention,
-                id=from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-        return  # Exit if force subscription is required
+        except Exception as e:
+            print(f"Error in Force Subscription: {e}")
+            return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
 
     # ✅ If user is subscribed, continue with normal start message
-    await temp.delete()
-    btns = []
-    for elem in Var.START_BUTTONS.split():
-        try:
-            bt, link = elem.split('|', maxsplit=1)
-        except:
-            continue
-        if len(btns) != 0 and len(btns[-1]) == 1:
-            btns[-1].insert(1, InlineKeyboardButton(bt, url=link))
-        else:
-            btns.append([InlineKeyboardButton(bt, url=link)])
-
-    smsg = Var.START_MSG.format(
-        first_name=from_user.first_name,
-        last_name=from_user.last_name,
-        mention=from_user.mention, 
-        user_id=from_user.id
-    )
-
-    if Var.START_PHOTO:
-        await message.reply_photo(
-            photo=Var.START_PHOTO, 
-            caption=smsg,
-            reply_markup=InlineKeyboardMarkup(btns) if len(btns) != 0 else None
-        )
-    else:
-        await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
-
-    # ✅ Handle Movie Fetching from Stored Database
     if len(txtargs) <= 1:
+        await temp.delete()
+        btns = []
+        for elem in Var.START_BUTTONS.split():
+            try:
+                bt, link = elem.split('|', maxsplit=1)
+            except:
+                continue
+            if len(btns) != 0 and len(btns[-1]) == 1:
+                btns[-1].insert(1, InlineKeyboardButton(bt, url=link))
+            else:
+                btns.append([InlineKeyboardButton(bt, url=link)])
+
+        smsg = Var.START_MSG.format(
+            first_name=from_user.first_name,
+            last_name=from_user.last_name,
+            mention=from_user.mention, 
+            user_id=from_user.id
+        )
+
+        if Var.START_PHOTO:
+            await message.reply_photo(
+                photo=Var.START_PHOTO, 
+                caption=smsg,
+                reply_markup=InlineKeyboardMarkup(btns) if len(btns) != 0 else None
+            )
+        else:
+            await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
         return
 
+    # ✅ Handle Movie Fetching from Stored Database
     try:
         arg = (await decode(txtargs[1])).split('-')
     except Exception as e:
@@ -174,9 +161,9 @@ async def start_msg(client, message):
             if CUSTOM_CAPTION and msg.document:
                 caption = CUSTOM_CAPTION.format(previouscaption=original_caption, filename=msg.document.file_name)
             elif HIDE_CAPTION and (msg.document or msg.audio):
-                caption = original_caption
-            else:
                 caption = f"{original_caption}\n\n{CUSTOM_CAPTION}"
+            else:
+                caption = original_caption
 
             reply_markup = (
                 InlineKeyboardMarkup([[InlineKeyboardButton(text=button_name, url=button_link)]])
@@ -191,9 +178,8 @@ async def start_msg(client, message):
                 )
                 await temp.delete()
 
-                # ⏳ Auto-Delete after Timer
+                # ⏳ Auto-Delete after Timer with Notification
                 if AUTO_DEL:
-                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
                     asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
 
             except FloodWait as e:
@@ -203,7 +189,6 @@ async def start_msg(client, message):
                 )
 
                 if AUTO_DEL:
-                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
                     asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
 
         except Exception as e:
