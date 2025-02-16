@@ -46,6 +46,7 @@ class Var:
     LOG_CHANNEL = int(getenv("LOG_CHANNEL") or 0)
     FILE_STORE = int(getenv("FILE_STORE"))
     ADMINS = list(map(int, getenv("ADMINS", "1242011540").split()))
+    OWNER_ID = list(map(int, getenv("ADMINS", "1242011540").split()))
     
     SEND_SCHEDULE = getenv("SEND_SCHEDULE", "False").lower() == "true"
     BRAND_UNAME = getenv("BRAND_UNAME", "@username")
