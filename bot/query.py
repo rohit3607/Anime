@@ -6,6 +6,7 @@ from bot.FORMATS import *
 from pyrogram.enums import ChatAction
 from bot.autoDelete import convert_time
 from bot.core.database import db
+from bot.core.database import *
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto, ReplyKeyboardMarkup, ReplyKeyboardRemove    
 
 #File setting function for retriveing modes and state of file related setting
