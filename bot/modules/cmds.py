@@ -90,16 +90,14 @@ async def start_msg(client, message):
         await db.add_user(uid)
 
     # 🔍 Check if user is subscribed (including pending requests)
-    is_subscribed = True
-    REQFSUB = await db.get_request_forcesub()
+    is_subscribed = await is_subscribed(None, client, message)
     buttons = []
-    count = 0
 
-    for chat_id in await db.get_all_channels():
-        if not await is_userJoin(client, uid, chat_id):
-            is_subscribed = False
-            try:
-                # Fetch chat data (use cache to reduce API calls)
+    if not is_subscribed:
+        try:
+            REQFSUB = await db.get_request_forcesub()
+
+            for chat_id in await db.get_all_channels():
                 if chat_id in chat_data_cache:
                     data = chat_data_cache[chat_id]
                 else:
@@ -108,8 +106,8 @@ async def start_msg(client, message):
 
                 cname = data.title
 
-                # Handle private channels & links
-                if REQFSUB and not data.username: 
+                # Handle private channels & generate invite links
+                if REQFSUB and not data.username:
                     link = await db.get_stored_reqLink(chat_id)
                     await db.add_reqChannel(chat_id)
 
@@ -119,36 +117,28 @@ async def start_msg(client, message):
                 else:
                     link = data.invite_link
 
-                # Add button for non-subscribed channels
                 buttons.append([InlineKeyboardButton(text=cname, url=link)])
-                count += 1
-                await temp.edit(f"<b>{'! ' * count}</b>")
 
-            except Exception as e:
-                print(f"Error: Bot might not be admin in {chat_id}")
-                return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
-
-    # 🚨 If NOT subscribed, show force-subscription message
-    if not is_subscribed:
-        try:
-            bot_info = await client.get_me()  
-            bot_username = bot_info.username  
+            bot_info = await client.get_me()
+            bot_username = bot_info.username
             buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
-        except IndexError:
-            pass
 
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=from_user.first_name,
-                last=from_user.last_name,
-                username=None if not from_user.username else '@' + from_user.username,
-                mention=from_user.mention,
-                id=from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-        return
+            await message.reply_photo(
+                photo=FORCE_PIC,
+                caption=FORCE_MSG.format(
+                    first=from_user.first_name,
+                    last=from_user.last_name,
+                    username=None if not from_user.username else '@' + from_user.username,
+                    mention=from_user.mention,
+                    id=from_user.id
+                ),
+                reply_markup=InlineKeyboardMarkup(buttons),
+            )
+            return
+
+        except Exception as e:
+            print(f"Error in Force Subscription: {e}")
+            return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
 
     # ✅ If user is subscribed, continue with normal start message
     if len(txtargs) <= 1:
