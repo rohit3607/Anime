@@ -9,6 +9,8 @@ START_PIC = "https://telegra.ph/file/ec17880d61180d3312d6a.jpg"
 FORCE_PIC = "https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg"
 
 
+CUSTOM_CAPTION = "<b>ʙʏ @Javpostr</b>"
+
 #start message
 START_MSG = """Hello {mention}
 
