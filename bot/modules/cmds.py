@@ -37,8 +37,11 @@ chat_data_cache = {}
 @bot.on_message(command('start') & private)
 @new_task
 async def start_msg(client, message):
+  
     uid = message.from_user.id
     from_user = message.from_user
+    bot_info = await client.get_me()  
+    bot_username = bot_info.username  
     txtargs = message.text.split()
     temp = await sendMessage(message, "<i>Connecting..</i>")
 
@@ -52,56 +55,55 @@ async def start_msg(client, message):
     buttons = []
     count = 0
 
-    for chat_id in await db.get_all_channels():
-        if not await is_userJoin(client, uid, chat_id):
-            is_subscribed = False
-            try:
-                # Fetch chat data (use cache to reduce API calls)
-                if chat_id in chat_data_cache:
-                    data = chat_data_cache[chat_id]
-                else:
-                    data = await client.get_chat(chat_id)
-                    chat_data_cache[chat_id] = data
+    try:
+        for total, chat_id in enumerate(await db.get_all_channels(), start=1):
+            await message.reply_chat_action(ChatAction.PLAYING)
 
-                cname = data.title
+            # Show the join button of non-subscribed Channels.....
+            if not await is_userJoin(client, user_id, chat_id):
+                try:
+                    # Check if chat data is in cache
+                    if chat_id in chat_data_cache:
+                        data = chat_data_cache[chat_id]  # Get data from cache
+                    else:
+                        data = await client.get_chat(chat_id)  # Fetch from API
+                        chat_data_cache[chat_id] = data  # Store in cache
 
-                # Handle private channels & links
-                if REQFSUB and not data.username: 
-                    link = await db.get_stored_reqLink(chat_id)
-                    await db.add_reqChannel(chat_id)
+                    cname = data.title
 
-                    if not link:
-                        link = (await client.create_chat_invite_link(chat_id=chat_id, creates_join_request=True)).invite_link
-                        await db.store_reqLink(chat_id, link)
-                else:
-                    link = data.invite_link
+                    # Handle private channels and links
+                    if REQFSUB and not data.username: 
+                        link = await db.get_stored_reqLink(chat_id)
+                        await db.add_reqChannel(chat_id)
 
-                # Add button for non-subscribed channels
-                buttons.append([InlineKeyboardButton(text=cname, url=link)])
-                count += 1
-                await temp.edit(f"<b>{'! ' * count}</b>")
+                        if not link:
+                            link = (await client.create_chat_invite_link(chat_id=chat_id, creates_join_request=True)).invite_link
+                            await db.store_reqLink(chat_id, link)
+                    else:
+                        link = data.invite_link
 
-            except Exception as e:
-                print(f"Error: Bot might not be admin in {chat_id}")
-                return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
+                    # Add button for the chat
+                    buttons.append([InlineKeyboardButton(text=cname, url=link)])
+                    count += 1
+                    await temp.edit(f"<b>{'! ' * count}</b>")
 
-    # 🚨 If NOT subscribed, show force-subscription message
-    if not is_subscribed:
+                except Exception as e:
+                    print(f"Can't Export Channel Name and Link..., Please Check If the Bot is admin in the FORCE SUB CHANNELS:\nProvided Force sub Channel:- {chat_id}")
+                    return await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
+
         try:
-            bot_info = await client.get_me()  
-            bot_username = bot_info.username  
-            buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
+            buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
         except IndexError:
             pass
 
         await message.reply_photo(
             photo=FORCE_PIC,
             caption=FORCE_MSG.format(
-                first=from_user.first_name,
-                last=from_user.last_name,
-                username=None if not from_user.username else '@' + from_user.username,
-                mention=from_user.mention,
-                id=from_user.id
+                first=message.from_user.first_name,
+                last=message.from_user.last_name,
+                username=None if not message.from_user.username else '@' + message.from_user.username,
+                mention=message.from_user.mention,
+                id=message.from_user.id
             ),
             reply_markup=InlineKeyboardMarkup(buttons),
         )
