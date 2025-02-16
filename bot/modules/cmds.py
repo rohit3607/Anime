@@ -30,9 +30,11 @@ from bot.func import *
 from bot.autoDelete import *
 from bot.query import *
 
+# Create a global dictionary to store chat data
+chat_data_cache = {}
 
 
-@bot.on_message(command('start') & private & subscribed)
+@bot.on_message(command('start') & private)
 @new_task
 async def start_msg(client, message):
     uid = message.from_user.id
@@ -40,10 +42,72 @@ async def start_msg(client, message):
     txtargs = message.text.split()
     temp = await sendMessage(message, "<i>Connecting..</i>")
 
-    #if not await is_fsubbed(uid):
-        #txt, btns = await get_fsubs(uid, txtargs)
-        #return await editMessage(temp, txt, #InlineKeyboardMarkup(btns))
+    # ✅ Add user to DB if not already present
+    if not await db.present_user(uid):
+        await db.add_user(uid)
 
+    # 🔍 Check if user is subscribed
+    is_subscribed = True
+    REQFSUB = await db.get_request_forcesub()
+    buttons = []
+    count = 0
+
+    for chat_id in await db.get_all_channels():
+        if not await is_userJoin(client, uid, chat_id):
+            is_subscribed = False
+            try:
+                # Fetch chat data (use cache to reduce API calls)
+                if chat_id in chat_data_cache:
+                    data = chat_data_cache[chat_id]
+                else:
+                    data = await client.get_chat(chat_id)
+                    chat_data_cache[chat_id] = data
+
+                cname = data.title
+
+                # Handle private channels & links
+                if REQFSUB and not data.username: 
+                    link = await db.get_stored_reqLink(chat_id)
+                    await db.add_reqChannel(chat_id)
+
+                    if not link:
+                        link = (await client.create_chat_invite_link(chat_id=chat_id, creates_join_request=True)).invite_link
+                        await db.store_reqLink(chat_id, link)
+                else:
+                    link = data.invite_link
+
+                # Add button for non-subscribed channels
+                buttons.append([InlineKeyboardButton(text=cname, url=link)])
+                count += 1
+                await temp.edit(f"<b>{'! ' * count}</b>")
+
+            except Exception as e:
+                print(f"Error: Bot might not be admin in {chat_id}")
+                return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
+
+    # 🚨 If NOT subscribed, show force-subscription message
+    if not is_subscribed:
+        try:
+            bot_info = await client.get_me()  
+            bot_username = bot_info.username  
+            buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
+        except IndexError:
+            pass
+
+        await message.reply_photo(
+            photo=FORCE_PIC,
+            caption=FORCE_MSG.format(
+                first=from_user.first_name,
+                last=from_user.last_name,
+                username=None if not from_user.username else '@' + from_user.username,
+                mention=from_user.mention,
+                id=from_user.id
+            ),
+            reply_markup=InlineKeyboardMarkup(buttons),
+        )
+        return
+
+    # ✅ If user is subscribed, continue with normal start message
     if len(txtargs) <= 1:
         await temp.delete()
         btns = []
@@ -57,10 +121,12 @@ async def start_msg(client, message):
             else:
                 btns.append([InlineKeyboardButton(bt, url=link)])
 
-        smsg = Var.START_MSG.format(first_name=from_user.first_name,
-                                    last_name=from_user.last_name,
-                                    mention=from_user.mention, 
-                                    user_id=from_user.id)
+        smsg = Var.START_MSG.format(
+            first_name=from_user.first_name,
+            last_name=from_user.last_name,
+            mention=from_user.mention, 
+            user_id=from_user.id
+        )
 
         if Var.START_PHOTO:
             await message.reply_photo(
@@ -72,6 +138,7 @@ async def start_msg(client, message):
             await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
         return
 
+    # ✅ Handle Movie Fetching from Stored Database
     try:
         arg = (await decode(txtargs[1])).split('-')
     except Exception as e:
@@ -92,6 +159,7 @@ async def start_msg(client, message):
             if msg.empty:
                 return await editMessage(temp, "<b>File Not Found !</b>")
 
+            # ✅ Fetch Auto-Delete, Caption & Protection Settings
             AUTO_DEL, DEL_TIMER, HIDE_CAPTION, CHNL_BTN, PROTECT_MODE = await asyncio.gather(
                 db.get_auto_delete(), db.get_del_timer(), db.get_hide_caption(), db.get_channel_button(), db.get_protect_content()
             )
@@ -113,12 +181,14 @@ async def start_msg(client, message):
                 else msg.reply_markup
             )
 
+            # ✅ Send the File to User
             try:
                 copied_msg = await msg.copy(
                     message.chat.id, caption=caption, parse_mode=ParseMode.HTML, reply_markup=reply_markup, protect_content=PROTECT_MODE
                 )
                 await temp.delete()
 
+                # ⏳ Auto-Delete after Timer
                 if AUTO_DEL:
                     asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
                     asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
@@ -138,82 +208,7 @@ async def start_msg(client, message):
             await editMessage(temp, "<b>File Not Found !</b>")
     else:
         await editMessage(temp, "<b>Input Link is Invalid for Usage !</b>")
-    
 
-
-
-# Create a global dictionary to store chat data
-chat_data_cache = {}
-
-@bot.on_message(filters.command('start') & filters.private)
-async def not_joined(client: Client, message: Message):
-    temp = await message.reply(f"<b>??</b>")
-
-    user_id = message.from_user.id
-
-    REQFSUB = await db.get_request_forcesub()
-    buttons = []
-    count = 0
-
-    try:
-        for total, chat_id in enumerate(await db.get_all_channels(), start=1):
-            await message.reply_chat_action(ChatAction.PLAYING)
-
-            # Show the join button of non-subscribed Channels
-            if not await is_userJoin(client, user_id, chat_id):
-                try:
-                    # Check if chat data is in cache
-                    if chat_id in chat_data_cache:
-                        data = chat_data_cache[chat_id]  # Get data from cache
-                    else:
-                        data = await client.get_chat(chat_id)  # Fetch from API
-                        chat_data_cache[chat_id] = data  # Store in cache
-
-                    cname = data.title
-
-                    # Handle private channels and links
-                    if REQFSUB and not data.username: 
-                        link = await db.get_stored_reqLink(chat_id)
-                        await db.add_reqChannel(chat_id)
-
-                        if not link:
-                            link = (await client.create_chat_invite_link(chat_id=chat_id, creates_join_request=True)).invite_link
-                            await db.store_reqLink(chat_id, link)
-                    else:
-                        link = data.invite_link
-
-                    # Add button for the chat
-                    buttons.append([InlineKeyboardButton(text=cname, url=link)])
-                    count += 1
-                    await temp.edit(f"<b>{'! ' * count}</b>")
-
-                except Exception as e:
-                    print(f"Can't Export Channel Name and Link..., Please Check If the Bot is admin in the FORCE SUB CHANNELS:\nProvided Force sub Channel:- {chat_id}")
-                    return await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
-
-        try:
-            # Fetch bot username correctly
-            bot_info = await client.get_me()  
-            bot_username = bot_info.username  
-            buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
-        except IndexError:
-            pass
-
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-
-    except Exception as e:
-        print(f"Error: {e}")  # Print the error message for debugging
-        await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
 
 
 @bot.on_message(command('pause') & private & user(Var.ADMINS))
