@@ -66,7 +66,7 @@ async def authoUser(query, id, owner_only=False):
             return False
         return True
 
-@Bot.on_callback_query()
+@bot.on_callback_query()
 async def cb_handler(client: Bot, query: CallbackQuery):
     data = query.data        
     if data == "close":
