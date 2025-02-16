@@ -34,6 +34,31 @@ from bot.query import *
 # Create a global dictionary to store chat data
 chat_data_cache = {}
 
+# Check user subscription in channels in a more optimized way
+async def is_subscribed(filter, client, update):
+    channel_ids = await db.get_all_channels()
+
+    if not channel_ids:
+        return True  # No forced subscription required
+
+    user_id = update.from_user.id
+
+    # Allow owner and admins to bypass subscription check
+    if user_id == OWNER_ID or user_id in Var.ADMINS:
+        return True
+
+    # Handle the case for a single channel directly
+    if len(channel_ids) == 1:
+        return await is_userJoin(client, user_id, channel_ids[0])
+
+    # Use asyncio.gather to check multiple channels concurrently
+    tasks = [is_userJoin(client, user_id, channel_id) for channel_id in channel_ids if channel_id]
+    results = await asyncio.gather(*tasks)
+
+    # Return True only if the user is subscribed to ALL required channels
+    return all(results)
+
+
 #Chcek user subscription by specifying channel id and user id
 async def is_userJoin(client, user_id, channel_id):
     #REQFSUB = await db.get_request_forcesub()
