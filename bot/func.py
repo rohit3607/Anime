@@ -34,12 +34,12 @@ from bot.core.reporter import rep
 #=============================================================================================================================================================================
 
 
-from dotenv import load_dotenv
-import os
+#from dotenv import load_dotenv
+#import os
 
-load_dotenv()  # Load environment variables from .env
+#load_dotenv()  # Load environment variables #from .env
 
-OWNER_ID = os.getenv("ADMINS")
+#OWNER_ID = os.getenv("ADMINS")
 
 OK = {}
 
@@ -110,7 +110,7 @@ async def is_subscribed(filter, client, update):
     user_id = update.from_user.id
 
     # Allow owner and admins to bypass subscription check
-    if user_id == OWNER_ID or user_id in Var.ADMINS:
+    if user_id == user_id in Var.ADMINS:
         return True
 
     # Handle the case for a single channel directly
