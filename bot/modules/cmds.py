@@ -30,6 +30,11 @@ from bot.func import *
 from bot.autoDelete import *
 from bot.query import *
 
+
+START_PIC = https://telegra.ph/file/ec17880d61180d3312d6a.jpg
+
+FORCE_PIC = https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg
+
 @bot.on_message(command('start') & private & subscribed)
 @new_task
 async def start_msg(client, message):
