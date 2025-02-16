@@ -47,7 +47,7 @@ async def start_msg(client, message):
     if not await db.present_user(uid):
         await db.add_user(uid)
 
-    # 🔍 Check if user is subscribed
+    # 🔍 Check if user is subscribed (including pending requests)
     is_subscribed = True
     REQFSUB = await db.get_request_forcesub()
     buttons = []
@@ -189,9 +189,8 @@ async def start_msg(client, message):
                 )
                 await temp.delete()
 
-                # ⏳ Auto-Delete after Timer
+                # ⏳ Auto-Delete after Timer with Notification
                 if AUTO_DEL:
-                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
                     asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
 
             except FloodWait as e:
@@ -201,7 +200,6 @@ async def start_msg(client, message):
                 )
 
                 if AUTO_DEL:
-                    asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
                     asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
 
         except Exception as e:
@@ -209,7 +207,6 @@ async def start_msg(client, message):
             await editMessage(temp, "<b>File Not Found !</b>")
     else:
         await editMessage(temp, "<b>Input Link is Invalid for Usage !</b>")
-
 
 
 @bot.on_message(command('pause') & private & user(Var.ADMINS))
