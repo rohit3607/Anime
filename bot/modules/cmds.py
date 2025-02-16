@@ -37,11 +37,10 @@ chat_data_cache = {}
 @bot.on_message(command('start') & private)
 @new_task
 async def start_msg(client, message):
-  
     uid = message.from_user.id
     user_id = message.from_user.id
     from_user = message.from_user
-    bot_info = await client.get_me()  
+    bot_info = await client.get_me()
     bot_username = bot_info.username  
     txtargs = message.text.split()
     temp = await sendMessage(message, "<i>Connecting..</i>")
@@ -50,29 +49,27 @@ async def start_msg(client, message):
     if not await db.present_user(uid):
         await db.add_user(uid)
 
-    # 🔍 Check if user is subscribed (including pending requests)
-    is_subscribed = True
+    # 🔍 Check Subscription Status
     REQFSUB = await db.get_request_forcesub()
-    buttons = []
+    force_sub_buttons = []
     count = 0
+    force_msg_sent = False  
 
     try:
         for total, chat_id in enumerate(await db.get_all_channels(), start=1):
             await message.reply_chat_action(ChatAction.PLAYING)
 
-            # Show the join button of non-subscribed Channels.....
             if not await is_userJoin(client, user_id, chat_id):
                 try:
-                    # Check if chat data is in cache
                     if chat_id in chat_data_cache:
-                        data = chat_data_cache[chat_id]  # Get data from cache
+                        data = chat_data_cache[chat_id]  
                     else:
-                        data = await client.get_chat(chat_id)  # Fetch from API
-                        chat_data_cache[chat_id] = data  # Store in cache
+                        data = await client.get_chat(chat_id)  
+                        chat_data_cache[chat_id] = data  
 
                     cname = data.title
 
-                    # Handle private channels and links
+                    # Handle private channels
                     if REQFSUB and not data.username: 
                         link = await db.get_stored_reqLink(chat_id)
                         await db.add_reqChannel(chat_id)
@@ -83,39 +80,41 @@ async def start_msg(client, message):
                     else:
                         link = data.invite_link
 
-                    # Add button for the chat
-                    buttons.append([InlineKeyboardButton(text=cname, url=link)])
+                    force_sub_buttons.append([InlineKeyboardButton(text=cname, url=link)])
                     count += 1
                     await temp.edit(f"<b>{'! ' * count}</b>")
+                    force_msg_sent = True  
 
                 except Exception as e:
-                    print(f"Can't Export Channel Name and Link..., Please Check If the Bot is admin in the FORCE SUB CHANNELS:\nProvided Force sub Channel:- {chat_id}")
+                    print(f"Can't Export Channel Name and Link..., Please Check Bot's Admin Status in FORCE SUB CHANNELS:\nProvided Channel: {chat_id}")
                     return await temp.edit(f"<b><i>! Eʀʀᴏʀ, Cᴏɴᴛᴀᴄᴛ ᴅᴇᴠᴇʟᴏᴘᴇʀ ᴛᴏ sᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇs @rohit_1888</i></b>\n<blockquote expandable><b>Rᴇᴀsᴏɴ:</b> {e}</blockquote>")
 
-        try:
-            buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
-        except IndexError:
-            pass
+        # 🚀 If Force Subscription is Required, Send Message and STOP Execution
+        if force_msg_sent:
+            try:
+                force_sub_buttons.append([InlineKeyboardButton(text='♻️ Tʀʏ Aɢᴀɪɴ', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
+            except IndexError:
+                pass
 
-        await message.reply_photo(
-            photo=FORCE_PIC,
-            caption=FORCE_MSG.format(
-                first=message.from_user.first_name,
-                last=message.from_user.last_name,
-                username=None if not message.from_user.username else '@' + message.from_user.username,
-                mention=message.from_user.mention,
-                id=message.from_user.id
-            ),
-            reply_markup=InlineKeyboardMarkup(buttons),
-        )
-        return
+            await message.reply_photo(
+                photo=FORCE_PIC,
+                caption=FORCE_MSG.format(
+                    first=message.from_user.first_name,
+                    last=message.from_user.last_name,
+                    username=None if not message.from_user.username else '@' + message.from_user.username,
+                    mention=message.from_user.mention,
+                    id=message.from_user.id
+                ),
+                reply_markup=InlineKeyboardMarkup(force_sub_buttons),
+            )
+
+            return  # ✅ Stop execution here
+
     except Exception as e:
-        print(f"Error: {e}")  # Print the error message for debugging
-        # Optionally, send an error message to the user or handle further actions here
-        
+        print(f"Error: {e}")  
         return
 
-    # ✅ If user is subscribed, continue with normal start message
+    # ✅ Proceed with Normal Start Message if Force Message Was NOT Sent
     if len(txtargs) <= 1:
         await temp.delete()
         btns = []
@@ -216,6 +215,7 @@ async def start_msg(client, message):
             await editMessage(temp, "<b>File Not Found !</b>")
     else:
         await editMessage(temp, "<b>Input Link is Invalid for Usage !</b>")
+
 
 @bot.on_message(command('pause') & private & user(Var.ADMINS))
 async def pause_fetch(client, message):
