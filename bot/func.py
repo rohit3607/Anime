@@ -34,7 +34,12 @@ from bot.core.reporter import rep
 #=============================================================================================================================================================================
 
 
-OWNER_ID = vars.ADMINS
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env
+
+OWNER_ID = os.getenv("ADMINS")
 
 OK = {}
 
