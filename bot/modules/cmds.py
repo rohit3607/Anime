@@ -31,9 +31,6 @@ from bot.autoDelete import *
 from bot.query import *
 
 
-#START_PIC = https://telegra.ph/file/ec17880d61180d3312d6a.jpg
-
-#FORCE_PIC = https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg
 
 @bot.on_message(command('start') & private & subscribed)
 @new_task
@@ -203,8 +200,7 @@ async def not_joined(client: Client, message: Message):
             pass
 
         await message.reply_photo(
-            photo=https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg
-,
+            photo=FORCE_PIC,
             caption=FORCE_MSG.format(
                 first=message.from_user.first_name,
                 last=message.from_user.last_name,
