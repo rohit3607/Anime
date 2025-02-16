@@ -4,9 +4,9 @@ files_cmd_pic = "https://telegra.ph/file/d44f46054250a73053614.jpg"
 autodel_cmd_pic = "https://telegra.ph/file/a64533814021b40057ccd.jpg"
 
 
-START_PIC = https://telegra.ph/file/ec17880d61180d3312d6a.jpg
+START_PIC = "https://telegra.ph/file/ec17880d61180d3312d6a.jpg"
 
-FORCE_PIC = https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg
+FORCE_PIC = "https://telegra.ph/file/e292b12890b8b4b9dcbd1.jpg"
 
 
 #start message
