@@ -359,7 +359,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'more_settings':
-        if await authoUser(query, query.from_user.id) :
+        #if await authoUser(query, query.from_user.id) :
             #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
             try:
                 await query.message.edit_text("<b>Pʟᴇᴀsᴇ wᴀɪᴛ !\n\n<i>🔄 Rᴇᴛʀɪᴇᴠɪɴɢ ᴀʟʟ Sᴇᴛᴛɪɴɢs...</i></b>")
@@ -399,8 +399,8 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_users':
-        if await authoUser(query, query.from_user.id) :
-        await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")    
+        #if await authoUser(query, query.from_user.id) :
+        #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")    
         try:
             REQFSUB_CHNLS = await db.get_reqChannel()
             if not REQFSUB_CHNLS:
@@ -441,7 +441,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_chnls':
-        if await authoUser(query, query.from_user.id, owner_only=True) 
+        #if await authoUser(query, query.from_user.id, owner_only=True) 
             
         try:
             REQFSUB_CHNLS = await db.get_reqChannel()
@@ -500,8 +500,8 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_links':
-        if await authoUser(query, query.from_user.id) :
-        await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
+        #if await authoUser(query, query.from_user.id) :
+        #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
             
         try:
             REQFSUB_CHNLS = await db.get_reqLink_channels()
@@ -563,8 +563,8 @@ async def cb_handler(client: bot, query: CallbackQuery):
             
 
     elif data == 'req_fsub':
-        if await authoUser(query, query.from_user.id) :
-        await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
+        #if await authoUser(query, query.from_user.id) :
+        #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
     
         try:
             on = off = ""
