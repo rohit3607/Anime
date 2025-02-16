@@ -47,7 +47,7 @@ async def start_msg(client, message):
         await db.add_user(uid)
 
     # 🔍 Check if user is subscribed (including pending requests)
-    is_subscribed = True  # Default assumption
+    is_subscribed = await is_userJoin(client, uid, chat_id)  # User is NOT subscribed
     REQFSUB = await db.get_request_forcesub()
     buttons = []
     count = 0
