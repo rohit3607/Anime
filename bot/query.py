@@ -262,7 +262,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
                     print(f"! Error Occured on callback data = 'setcb' -> Rᴇᴀsᴏɴ: 1 minute Time out ..")
 
     elif data == 'autodel_cmd':
-        if await authoUser(query, query.from_user.id, owner_only=True) :
+        if await authoUser(query, query.from_user.id) :
             await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....") 
 
             try:
@@ -285,7 +285,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
                 print(f"! Error Occured on callback data = 'autodel_cmd' : {e}")
 
     elif data == 'chng_autodel':
-        if await authoUser(query, query.from_user.id, owner_only=True) :
+        if await authoUser(query, query.from_user.id) :
             await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
 
             try:
@@ -309,7 +309,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
     elif data == 'set_timer':
         id = query.from_user.id
-        if await authoUser(query, id, owner_only=True) :
+        if await authoUser(query, id) :
             try:
 
                 timer = convert_time(await db.get_del_timer())
@@ -334,7 +334,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
                     print(f"! Error Occured on callback data = 'set_timer' -> Rᴇᴀsᴏɴ: 1 minute Time out ..")
 
     elif data == 'chng_req':
-        if await authoUser(query, query.from_user.id, owner_only=True) :
+        if await authoUser(query, query.from_user.id) :
             await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
 
             try:
@@ -359,7 +359,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'more_settings':
-        if await authoUser(query, query.from_user.id, owner_only=True) :
+        if await authoUser(query, query.from_user.id) :
             #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
             try:
                 await query.message.edit_text("<b>Pʟᴇᴀsᴇ wᴀɪᴛ !\n\n<i>🔄 Rᴇᴛʀɪᴇᴠɪɴɢ ᴀʟʟ Sᴇᴛᴛɪɴɢs...</i></b>")
@@ -399,8 +399,8 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_users':
-        #if await authoUser(query, query.from_user.id, owner_only=True) :
-        #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")    
+        if await authoUser(query, query.from_user.id) :
+        await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")    
         try:
             REQFSUB_CHNLS = await db.get_reqChannel()
             if not REQFSUB_CHNLS:
@@ -441,7 +441,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_chnls':
-        #if await authoUser(query, query.from_user.id, owner_only=True) 
+        if await authoUser(query, query.from_user.id, owner_only=True) 
             
         try:
             REQFSUB_CHNLS = await db.get_reqChannel()
@@ -500,8 +500,8 @@ async def cb_handler(client: bot, query: CallbackQuery):
 
 
     elif data == 'clear_links':
-        #if await authoUser(query, query.from_user.id, owner_only=True) :
-        #await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
+        if await authoUser(query, query.from_user.id) :
+        await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
             
         try:
             REQFSUB_CHNLS = await db.get_reqLink_channels()
@@ -563,7 +563,7 @@ async def cb_handler(client: bot, query: CallbackQuery):
             
 
     elif data == 'req_fsub':
-        #if await authoUser(query, query.from_user.id, owner_only=True) :
+        if await authoUser(query, query.from_user.id) :
         await query.answer("♻️ Qᴜᴇʀʏ Pʀᴏᴄᴇssɪɴɢ....")
     
         try:
