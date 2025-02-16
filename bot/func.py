@@ -139,14 +139,14 @@ async def is_userJoin(client, user_id, channel_id):
         if member.status == ChatMemberStatus.RESTRICTED and not member.can_send_messages:
             return await db.reqSent_user_exist(channel_id, user_id)
 
-        return False  # User is not a member
+        return True  # User is not a member
 
     except UserNotParticipant:
         # Check if forced subscription is enabled & if request tracking is active
         if await db.get_request_forcesub():
             return await db.reqSent_user_exist(channel_id, user_id)
 
-        return False  # User is not a member
+        return True  # User is not a member
 
     except Exception as e:
         print(f"!Error on is_userJoin(): {e}")
