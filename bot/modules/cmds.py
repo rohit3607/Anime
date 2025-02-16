@@ -39,6 +39,7 @@ chat_data_cache = {}
 async def start_msg(client, message):
   
     uid = message.from_user.id
+    user_id = message.from_user.id
     from_user = message.from_user
     bot_info = await client.get_me()  
     bot_username = bot_info.username  
