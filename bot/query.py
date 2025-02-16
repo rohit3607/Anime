@@ -67,7 +67,7 @@ async def authoUser(query, id, owner_only=False):
         return True
 
 @bot.on_callback_query()
-async def cb_handler(client: Bot, query: CallbackQuery):
+async def cb_handler(client: bot, query: CallbackQuery):
     data = query.data        
     if data == "close":
         await query.message.delete()
@@ -88,42 +88,11 @@ async def cb_handler(client: Bot, query: CallbackQuery):
             ]),
         )
 
-    elif data == "buy_prem":
-        # Delete the current message and send a new one with the photo
-        await query.message.delete()
-        await client.send_photo(
-            chat_id=query.message.chat.id,
-            photo=QR_PIC,
-            caption=(
-                f"👋 {query.from_user.username}\n\n"
-                f"🎖️ Available Plans :\n\n"
-                f"● {PRICE1}  For 7 Days Prime Membership\n\n"
-                f"● {PRICE2}  For 1 Month Prime Membership\n\n"
-                f"● {PRICE3}  For 3 Months Prime Membership\n\n"
-                f"● {PRICE4}  For 6 Months Prime Membership\n\n"
-                f"● {PRICE5}  For 1 Year Prime Membership\n\n\n"
-                f"💵 ASK UPI ID TO ADMIN AND PAY THERE -  <code>{UPI_ID}</code>\n\n\n"
-                f"♻️ After Payment You Will Get Instant Membership \n\n\n"
-                f"‼️ Must Send Screenshot after payment & If anyone want custom time membrship then ask admin"
-            ),
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton(
-                            "ADMIN 24/7", url=(SCREENSHOT_URL)
-                        )
-                    ],
-                    [InlineKeyboardButton("🔒 Close", callback_data="close")],
-                ]
-            )
-        )
 
     elif data == "setting":
         await query.edit_message_media(InputMediaPhoto(random.choice(PICS), "<b>Pʟᴇᴀsᴇ wᴀɪᴛ !\n\n<i>🔄 Rᴇᴛʀɪᴇᴠɪɴɢ ᴀʟʟ Sᴇᴛᴛɪɴɢs...</i></b>"))
         try:
             total_fsub = len(await db.get_all_channels())
-            total_admin = len(await db.get_all_admins())
-            total_ban = len(await db.get_ban_users())
             autodel_mode = 'Eɴᴀʙʟᴇᴅ' if await db.get_auto_delete() else 'Dɪsᴀʙʟᴇᴅ'
             protect_content = 'Eɴᴀʙʟᴇᴅ' if await db.get_protect_content() else 'Dɪsᴀʙʟᴇᴅ'
             hide_caption = 'Eɴᴀʙʟᴇᴅ' if await db.get_hide_caption() else 'Dɪsᴀʙʟᴇᴅ'
@@ -134,8 +103,6 @@ async def cb_handler(client: Bot, query: CallbackQuery):
                 InputMediaPhoto(random.choice(PICS),
                                 SETTING_TXT.format(
                                     total_fsub = total_fsub,
-                                    total_admin = total_admin,
-                                    total_ban = total_ban,
                                     autodel_mode = autodel_mode,
                                     protect_content = protect_content,
                                     hide_caption = hide_caption,
