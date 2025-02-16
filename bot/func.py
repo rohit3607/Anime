@@ -131,27 +131,30 @@ async def is_userJoin(client, user_id, channel_id):
     try:
         member = await client.get_chat_member(chat_id=channel_id, user_id=user_id)
 
-        # User is subscribed if they are an Owner, Admin, or Member
+        # ✅ User is already a member (Owner, Admin, or Approved Member)
         if member.status in {ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER}:
             return True
 
-        # ✅ If the user has sent a join request but is not yet approved
+        # ✅ If the user has sent a join request but isn't approved yet
         if member.status == ChatMemberStatus.RESTRICTED and not member.can_send_messages:
-            return await db.reqSent_user_exist(channel_id, user_id)
+            return True  # Consider user as "Joined" since they are waiting for approval
 
-        return True  # User is not a member
+        return False  # User is NOT a member
 
     except UserNotParticipant:
-        # Check if forced subscription is enabled & if request tracking is active
         if await db.get_request_forcesub():
-            return await db.reqSent_user_exist(channel_id, user_id)
+            # ✅ NEW FIX: Directly check for pending join requests
+            chat = await client.get_chat(channel_id)
+            if chat.has_protected_content:  # Ensures it's a private channel
+                requests = await client.get_chat_join_requests(channel_id)
+                if any(req.user.id == user_id for req in requests):
+                    return True  # User has sent a request, so consider them "Joined"
 
-        return True  # User is not a member
+        return False  # User is not in the channel & no pending request found
 
     except Exception as e:
         print(f"!Error on is_userJoin(): {e}")
         return False
-
 
 #=============================================================================================================================================================================#
 
