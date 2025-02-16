@@ -46,8 +46,7 @@ async def start_msg(client, message):
     if not await db.present_user(uid):
         await db.add_user(uid)
 
-    # 🔍 Check if user is subscribed (including pending requests)
-    #is_subscribed = await is_subscribed  # User is NOT subscribed
+    # 🔍 Initialize variables
     REQFSUB = await db.get_request_forcesub()
     buttons = []
     count = 0
@@ -57,7 +56,6 @@ async def start_msg(client, message):
         await message.reply_chat_action(ChatAction.PLAYING)  # Helps prevent bot delay
 
         if not await is_userJoin(client, uid, chat_id):
-            is_subscribed = await is_userJoin(client, uid, chat_id)  # User is NOT subscribed
             try:
                 # Fetch chat data (use cache to reduce API calls)
                 if chat_id in chat_data_cache:
@@ -88,15 +86,16 @@ async def start_msg(client, message):
                 print(f"Error: Bot might not be admin in {chat_id}")
                 continue  # Do NOT return; continue checking other channels
 
-    # 🚨 If NOT subscribed, show force-subscription message
-    #if not is_subscribed:
-        try:
-            bot_info = await client.get_me()  
-            bot_username = bot_info.username  
-            buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={message.command[1]}")])
-        except IndexError:
-            pass
+    # 🚨 Always show the buttons if any exist
+    try:
+        bot_info = await client.get_me()  
+        bot_username = bot_info.username  
+        buttons.append([InlineKeyboardButton(text='♻️ Try Again', url=f"https://t.me/{bot_username}?start={txtargs[1] if len(txtargs) > 1 else ''}")])
+    except IndexError:
+        pass
 
+    # ✅ Ensure we have at least one button before sending
+    if buttons:
         await message.reply_photo(
             photo=FORCE_PIC,
             caption=FORCE_MSG.format(
@@ -108,7 +107,10 @@ async def start_msg(client, message):
             ),
             reply_markup=InlineKeyboardMarkup(buttons),
         )
-        return
+    else:
+        #await sendMessage(message, "✅ You are already subscribed to all required channels!")
+
+    return
 
     # ✅ If user is subscribed, continue with normal start message
     if len(txtargs) <= 1:
