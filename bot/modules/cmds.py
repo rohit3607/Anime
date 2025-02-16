@@ -107,6 +107,10 @@ async def start_msg(client, message):
             ),
             reply_markup=InlineKeyboardMarkup(buttons),
         )
+    except Exception as e:
+        print(f"Error: {e}")  # Print the error message for debugging
+        # Optionally, send an error message to the user or handle further actions here
+        
         return
 
     # ✅ If user is subscribed, continue with normal start message
