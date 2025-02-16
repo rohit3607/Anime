@@ -27,6 +27,7 @@ from datetime import datetime
 import random
 import string
 from bot.core.database import db
+from bot.core.database import *
 from bot.core.auto_animes import get_animes
 from bot.core.reporter import rep
 #=============================================================================================================================================================================
@@ -141,6 +142,8 @@ async def is_userJoin(client, user_id, channel_id):
     except Exception as e:
         print(f"!Error on is_userJoin(): {e}")
         return False
-#=============================================================================================================================================================================
+
+
+#=============================================================================================================================================================================#
 
 subscribed = filters.create(is_subscribed)
