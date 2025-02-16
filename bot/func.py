@@ -92,47 +92,47 @@ async def gen_ss_sam(hash, filename, log):
     except Exception as err:
         log.error(str(err))
 
-
-# Check user subscription in Channels in a more optimized way
+# Check user subscription in channels in a more optimized way
 async def is_subscribed(filter, client, update):
-    Channel_ids = await db.get_all_channels()
+    channel_ids = await db.get_all_channels()
 
-    if not Channel_ids:
-        return True
+    if not channel_ids:
+        return True  # No forced subscription required
 
     user_id = update.from_user.id
 
-    if any([user_id == OWNER_ID, await db.admin_exist(user_id)]):
+    # Allow owner and admins to bypass subscription check
+    if user_id == OWNER_ID or user_id in Var.ADMINS:
         return True
 
-    # Handle the case for a single channel directly (no need for gather)
-    if len(Channel_ids) == 1:
-        return await is_userJoin(client, user_id, Channel_ids[0])
+    # Handle the case for a single channel directly
+    if len(channel_ids) == 1:
+        return await is_userJoin(client, user_id, channel_ids[0])
 
-    # Use asyncio gather to check multiple channels concurrently
-    tasks = [is_userJoin(client, user_id, ids) for ids in Channel_ids if ids]
+    # Use asyncio.gather to check multiple channels concurrently
+    tasks = [is_userJoin(client, user_id, channel_id) for channel_id in channel_ids if channel_id]
     results = await asyncio.gather(*tasks)
 
-    # If any result is False, return False; else return True
+    # Return True only if the user is subscribed to ALL required channels
     return all(results)
 
 
-#Chcek user subscription by specifying channel id and user id
+# Check user subscription by specifying channel ID and user ID
 async def is_userJoin(client, user_id, channel_id):
-    #REQFSUB = await db.get_request_forcesub()
     try:
         member = await client.get_chat_member(chat_id=channel_id, user_id=user_id)
         return member.status in {ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER}
 
     except UserNotParticipant:
-        if await db.get_request_forcesub(): #and await privateChannel(client, channel_id):
-                return await db.reqSent_user_exist(channel_id, user_id)
+        # If forced subscription is enabled, check if the user has a pending join request
+        if await db.get_request_forcesub():
+            return await db.reqSent_user_exist(channel_id, user_id)
 
-        return False
+        return False  # User is not a member
 
     except Exception as e:
-        print(f"!Error on is_userJoin(): {e}")
-        return False
+        print(f"!Error in is_userJoin(): {e}")
+        return False  # Handle any unexpected errors gracefully
 #=============================================================================================================================================================================
 
 subscribed = filters.create(is_subscribed)
