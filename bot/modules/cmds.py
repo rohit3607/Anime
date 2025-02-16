@@ -47,7 +47,7 @@ async def start_msg(client, message):
         await db.add_user(uid)
 
     # 🔍 Check if user is subscribed (including pending requests)
-    is_subscribed = await is_subscribed  # User is NOT subscribed
+    #is_subscribed = await is_subscribed  # User is NOT subscribed
     REQFSUB = await db.get_request_forcesub()
     buttons = []
     count = 0
@@ -89,7 +89,7 @@ async def start_msg(client, message):
                 continue  # Do NOT return; continue checking other channels
 
     # 🚨 If NOT subscribed, show force-subscription message
-    if not is_subscribed:
+    #if not is_subscribed:
         try:
             bot_info = await client.get_me()  
             bot_username = bot_info.username  
