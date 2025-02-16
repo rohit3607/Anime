@@ -57,7 +57,7 @@ async def start_msg(client, message):
         await message.reply_chat_action(ChatAction.PLAYING)  # Helps prevent bot delay
 
         if not await is_userJoin(client, uid, chat_id):
-            is_subscribed = False  # User is NOT subscribed
+            is_subscribed = await is_userJoin(client, uid, chat_id)  # User is NOT subscribed
             try:
                 # Fetch chat data (use cache to reduce API calls)
                 if chat_id in chat_data_cache:
