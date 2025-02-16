@@ -53,18 +53,15 @@ def buttonStatus(pc_data: str, hc_data: str, cb_data: str) -> list:
     ]
     return button
 
-#Verify user, if he/she is admin or owner before processing the query...
+# Verify user, if he/she is admin or owner before processing the query...
 async def authoUser(query, id, owner_only=False):
     if not owner_only:
-        if not any([id == OWNER_ID, await db.admin_exist(id)]):
+        if not any([id in Var.ADMINS]):  
             await query.answer("❌ Yᴏᴜ ᴀʀᴇ ɴᴏᴛ Aᴅᴍɪɴ !", show_alert=True)
             return False
         return True
-    else:
-        if id != OWNER_ID:
-            await query.answer("❌ Yᴏᴜ ᴀʀᴇ ɴᴏᴛ Oᴡɴᴇʀ !", show_alert=True)
-            return False
-        return True
+    
+
 
 @bot.on_callback_query()
 async def cb_handler(client: bot, query: CallbackQuery):
