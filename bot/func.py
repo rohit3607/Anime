@@ -5,7 +5,7 @@ import os
 import subprocess
 import math
 import re
-
+from bot import bot, bot_loop, Var, ani_cache
 from pathlib import Path
 
 import aiofiles
