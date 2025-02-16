@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 import random
 import string
+from pyrogram.enums import ParseMode, ChatAction
 
 from asyncio import sleep as asleep, gather
 from pyrogram import filters, Client
