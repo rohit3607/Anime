@@ -47,14 +47,17 @@ async def start_msg(client, message):
         await db.add_user(uid)
 
     # 🔍 Check if user is subscribed (including pending requests)
-    is_subscribed = True
+    is_subscribed = True  # Default assumption
     REQFSUB = await db.get_request_forcesub()
     buttons = []
     count = 0
 
+    # ✅ Check Subscription for All Channels
     for chat_id in await db.get_all_channels():
+        await message.reply_chat_action(ChatAction.PLAYING)  # Helps prevent bot delay
+
         if not await is_userJoin(client, uid, chat_id):
-            is_subscribed = False
+            is_subscribed = False  # User is NOT subscribed
             try:
                 # Fetch chat data (use cache to reduce API calls)
                 if chat_id in chat_data_cache:
@@ -83,7 +86,7 @@ async def start_msg(client, message):
 
             except Exception as e:
                 print(f"Error: Bot might not be admin in {chat_id}")
-                return await temp.edit(f"<b><i>❌ Error! Contact @rohit_1888</i></b>\n<blockquote expandable><b>Reason:</b> {e}</blockquote>")
+                continue  # Do NOT return; continue checking other channels
 
     # 🚨 If NOT subscribed, show force-subscription message
     if not is_subscribed:
