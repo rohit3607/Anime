@@ -107,43 +107,41 @@ async def start_msg(client, message):
             ),
             reply_markup=InlineKeyboardMarkup(buttons),
         )
-    else:
-        #await sendMessage(message, "✅ You are already subscribed to all required channels!")
-
-    return
+        return  # Exit if force subscription is required
 
     # ✅ If user is subscribed, continue with normal start message
-    if len(txtargs) <= 1:
-        await temp.delete()
-        btns = []
-        for elem in Var.START_BUTTONS.split():
-            try:
-                bt, link = elem.split('|', maxsplit=1)
-            except:
-                continue
-            if len(btns) != 0 and len(btns[-1]) == 1:
-                btns[-1].insert(1, InlineKeyboardButton(bt, url=link))
-            else:
-                btns.append([InlineKeyboardButton(bt, url=link)])
-
-        smsg = Var.START_MSG.format(
-            first_name=from_user.first_name,
-            last_name=from_user.last_name,
-            mention=from_user.mention, 
-            user_id=from_user.id
-        )
-
-        if Var.START_PHOTO:
-            await message.reply_photo(
-                photo=Var.START_PHOTO, 
-                caption=smsg,
-                reply_markup=InlineKeyboardMarkup(btns) if len(btns) != 0 else None
-            )
+    await temp.delete()
+    btns = []
+    for elem in Var.START_BUTTONS.split():
+        try:
+            bt, link = elem.split('|', maxsplit=1)
+        except:
+            continue
+        if len(btns) != 0 and len(btns[-1]) == 1:
+            btns[-1].insert(1, InlineKeyboardButton(bt, url=link))
         else:
-            await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
-        return
+            btns.append([InlineKeyboardButton(bt, url=link)])
+
+    smsg = Var.START_MSG.format(
+        first_name=from_user.first_name,
+        last_name=from_user.last_name,
+        mention=from_user.mention, 
+        user_id=from_user.id
+    )
+
+    if Var.START_PHOTO:
+        await message.reply_photo(
+            photo=Var.START_PHOTO, 
+            caption=smsg,
+            reply_markup=InlineKeyboardMarkup(btns) if len(btns) != 0 else None
+        )
+    else:
+        await sendMessage(message, smsg, InlineKeyboardMarkup(btns) if len(btns) != 0 else None)
 
     # ✅ Handle Movie Fetching from Stored Database
+    if len(txtargs) <= 1:
+        return
+
     try:
         arg = (await decode(txtargs[1])).split('-')
     except Exception as e:
