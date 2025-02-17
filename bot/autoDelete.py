@@ -2,6 +2,12 @@ import asyncio
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton 
 from datetime import datetime, timedelta
 
+
+
+
+    bot_info = await client.get_me()
+    bot_username = bot_info.username  
+
 #Time conversion for auto delete timer
 def convert_time(duration_seconds: int) -> str:
     periods = [
