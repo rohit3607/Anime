@@ -178,9 +178,9 @@ async def start_msg(client, message):
             if CUSTOM_CAPTION and msg.document:
                 caption = CUSTOM_CAPTION.format(previouscaption=original_caption, filename=msg.document.file_name)
             elif HIDE_CAPTION and (msg.document or msg.audio):
-                caption = f"{original_caption}\n\n{CUSTOM_CAPTION}"
-            else:
                 caption = original_caption
+            else:
+                caption = f"{original_caption}\n\n{CUSTOM_CAPTION}"
 
             reply_markup = (
                 InlineKeyboardMarkup([[InlineKeyboardButton(text=button_name, url=button_link)]])
@@ -198,7 +198,7 @@ async def start_msg(client, message):
                 # ⏳ Auto-Delete after Timer
                 if AUTO_DEL:
                     asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
-                    asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
+                    asyncio.create_task(auto_del_notification(bot_username, copied_msg, DEL_TIMER, txtargs[1]))
 
             except FloodWait as e:
                 await asyncio.sleep(e.x)
@@ -208,7 +208,7 @@ async def start_msg(client, message):
 
                 if AUTO_DEL:
                     asyncio.create_task(delete_message(copied_msg, DEL_TIMER))
-                    asyncio.create_task(auto_del_notification(client.username, copied_msg, DEL_TIMER, txtargs[1]))
+                    asyncio.create_task(auto_del_notification(bot_username, copied_msg, DEL_TIMER, txtargs[1]))
 
         except Exception as e:
             await rep.report(f"User : {uid} | Error : {str(e)}", "error")
