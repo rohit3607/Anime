@@ -1,6 +1,12 @@
 import asyncio
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton 
 from datetime import datetime, timedelta
+from pyrogram import filters, Client
+from pyrogram.filters import command, private, user
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.errors import FloodWait, MessageNotModified
+
+from bot import bot, bot_loop, Var, ani_cache
 
 
 
