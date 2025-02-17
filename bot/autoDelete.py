@@ -11,8 +11,8 @@ from bot import bot, bot_loop, Var, ani_cache
 
 
 
-    bot_info = await client.get_me()
-    bot_username = bot_info.username  
+    #bot_info = await client.get_me()
+    #bot_username = bot_info.username  
 
 #Time conversion for auto delete timer
 def convert_time(duration_seconds: int) -> str:
